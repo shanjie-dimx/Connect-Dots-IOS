@@ -1,0 +1,112 @@
+import SwiftUI
+
+extension Color {
+    init(hex: UInt32, opacity: Double = 1) {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255,
+            opacity: opacity
+        )
+    }
+}
+
+struct DotPalette {
+    let fill: Color
+    let dark: Color
+}
+
+enum Theme {
+    static let palette: [DotPalette] = [
+        DotPalette(fill: Color(hex: 0xF43F5E), dark: Color(hex: 0x9F1239)),
+        DotPalette(fill: Color(hex: 0x22C55E), dark: Color(hex: 0x166534)),
+        DotPalette(fill: Color(hex: 0x3B82F6), dark: Color(hex: 0x1E3A8A)),
+        DotPalette(fill: Color(hex: 0xFACC15), dark: Color(hex: 0xA16207)),
+    ]
+
+    static let accent = Color(hex: 0xFACC15)
+    static let muted = Color.white.opacity(0.72)
+    static let card = Color.white.opacity(0.1)
+    static let cardBorder = Color.white.opacity(0.18)
+    static let boardRim = Color(hex: 0x111827)
+    static let danger = Color(hex: 0xE11D48)
+
+    static let titleGradient = LinearGradient(
+        colors: [Color(hex: 0x4ADE80), Color(hex: 0xFACC15), Color(hex: 0xFB7185)],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+
+    static let primaryGradient = LinearGradient(
+        colors: [Color(hex: 0xF59E0B), Color(hex: 0xF43F5E)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let doneGradient = LinearGradient(
+        colors: [Color(hex: 0x22C55E, opacity: 0.55), Color(hex: 0x14B8A6, opacity: 0.35)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
+struct AppBackground: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(hex: 0x1E1B4B), Color(hex: 0x4C1D95)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            RadialGradient(
+                colors: [Color(hex: 0xBE185D), .clear],
+                center: UnitPoint(x: 0.1, y: 0),
+                startRadius: 0,
+                endRadius: 520
+            )
+            RadialGradient(
+                colors: [Color(hex: 0x0E7490), .clear],
+                center: UnitPoint(x: 1, y: 1),
+                startRadius: 0,
+                endRadius: 480
+            )
+        }
+        .ignoresSafeArea()
+    }
+}
+
+struct CardButtonStyle: ButtonStyle {
+    var background: AnyShapeStyle = AnyShapeStyle(Theme.card)
+    var bordered = true
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 17, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                if bordered {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.cardBorder)
+                }
+            }
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+struct IconButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 18, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 44, height: 44)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Theme.cardBorder))
+            .opacity(isEnabled ? 1 : 0.3)
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+    }
+}
