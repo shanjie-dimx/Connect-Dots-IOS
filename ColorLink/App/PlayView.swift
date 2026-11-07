@@ -20,7 +20,7 @@ struct PlayView: View {
                 toast
             }
             .animation(.easeOut(duration: 0.2), value: model.toast)
-            Text(model.levelIndex == 0 ? "按住一个点，拖到同色的另一个点" : "线路不能交叉，也不能穿过其他点")
+            Text(model.levelIndex == 0 ? "Hold a dot and drag it to the other dot of the same color" : "Lines can't cross or pass through other dots")
                 .font(.system(size: 14))
                 .foregroundStyle(Theme.muted)
                 .frame(minHeight: 20)
@@ -37,8 +37,11 @@ struct PlayView: View {
                     isLast: model.isLastLevel,
                     levelNumber: model.levelIndex + 1,
                     solvedCount: progress.solved.count,
+                    totalCount: LEVELS.filter { !$0.dots.isEmpty }.count,
                     onReplay: { onSelectLevel(model.levelIndex) },
-                    onNext: { model.isLastLevel ? onHome() : onSelectLevel(model.levelIndex + 1) }
+                    onNext: {
+                        if let next = model.nextLevelIndex { onSelectLevel(next) } else { onHome() }
+                    }
                 )
                 .transition(.opacity)
             }
@@ -53,21 +56,21 @@ struct PlayView: View {
         HStack(spacing: 12) {
             Button(action: onHome) { Image(systemName: "chevron.left") }
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("返回关卡列表")
+                .accessibilityLabel("Back to levels")
             VStack(spacing: 2) {
-                Text("第 \(model.levelIndex + 1) 关")
+                Text("Level \(model.levelIndex + 1)")
                     .font(.system(size: 22, weight: .black))
                     .kerning(1)
-                Text("\(model.game.dots.count) 个点 · 已连接 \(model.connectedCount)/\(model.game.colors.count)")
+                Text("\(model.game.colors.count) pairs · \(model.connectedCount)/\(model.game.colors.count) connected")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.muted)
                     .accessibilityIdentifier("level-sub")
             }
             .frame(maxWidth: .infinity)
-            Button { onSelectLevel(model.levelIndex + 1) } label: { Image(systemName: "chevron.right") }
+            Button { if let next = model.nextLevelIndex { onSelectLevel(next) } } label: { Image(systemName: "chevron.right") }
                 .buttonStyle(IconButtonStyle())
                 .disabled(model.isLastLevel)
-                .accessibilityLabel("下一关")
+                .accessibilityLabel("Next level")
         }
     }
 
@@ -88,13 +91,13 @@ struct PlayView: View {
 
     private var controls: some View {
         HStack(spacing: 12) {
-            Button(action: model.undo) { Label("撤销", systemImage: "arrow.uturn.backward") }
+            Button(action: model.undo) { Label("Undo", systemImage: "arrow.uturn.backward") }
                 .buttonStyle(CardButtonStyle())
                 .disabled(!model.game.canUndo)
                 .opacity(model.game.canUndo ? 1 : 0.4)
                 .keyboardShortcut("z", modifiers: .command)
                 .accessibilityIdentifier("undo")
-            Button(action: model.reset) { Label("重置", systemImage: "arrow.counterclockwise") }
+            Button(action: model.reset) { Label("Reset", systemImage: "arrow.counterclockwise") }
                 .buttonStyle(CardButtonStyle())
                 .disabled(model.game.paths.isEmpty)
                 .opacity(model.game.paths.isEmpty ? 0.4 : 1)
@@ -108,6 +111,7 @@ private struct WinCard: View {
     let isLast: Bool
     let levelNumber: Int
     let solvedCount: Int
+    let totalCount: Int
     let onReplay: () -> Void
     let onNext: () -> Void
 
@@ -120,21 +124,21 @@ private struct WinCard: View {
                 .background(.ultraThinMaterial.opacity(0.4))
                 .ignoresSafeArea()
             VStack(spacing: 6) {
-                Text(isLast ? "全部通关！" : "过关！")
+                Text(isLast ? "All clear!" : "Solved!")
                     .font(.system(size: 32, weight: .heavy))
-                    .kerning(3)
+                    .kerning(2)
                     .foregroundStyle(Theme.accent)
                 Text(isLast
-                    ? "\(LEVELS.count) 关全部完成，你的智商超过了 120！"
-                    : "第 \(levelNumber) 关完成，已通过 \(solvedCount)/\(LEVELS.count) 关")
+                    ? "You cleared every level. Your IQ is over 120!"
+                    : "Level \(levelNumber) done · \(solvedCount)/\(totalCount) solved")
                     .font(.system(size: 16))
                     .foregroundStyle(Theme.muted)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 14)
                 HStack(spacing: 10) {
-                    Button("再玩一次", action: onReplay)
+                    Button("Play again", action: onReplay)
                         .buttonStyle(CardButtonStyle(background: AnyShapeStyle(Color.white.opacity(0.08))))
-                    Button(isLast ? "返回关卡" : "下一关", action: onNext)
+                    Button(isLast ? "Levels" : "Next level", action: onNext)
                         .buttonStyle(CardButtonStyle(background: AnyShapeStyle(Theme.primaryGradient), bordered: false))
                 }
             }

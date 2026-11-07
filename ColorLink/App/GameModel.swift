@@ -9,9 +9,9 @@ final class GameModel: ObservableObject {
     }
 
     static let blockMessages: [BlockReason: String] = [
-        .line: "线路不能交叉",
-        .dot: "不能穿过其他点",
-        .edge: "不能超出圆圈",
+        .line: "Lines can't cross",
+        .dot: "Can't pass through other dots",
+        .edge: "Can't leave the circle",
     ]
 
     let levelIndex: Int
@@ -38,19 +38,32 @@ final class GameModel: ObservableObject {
 
     private static func level(at index: Int) -> Level {
         #if DEBUG
-        // UI tests can only drag in straight lines, so they use a level that straight lines solve.
-        if index == 0, ProcessInfo.processInfo.arguments.contains("-uiTestStraightLevel") {
+        // UI tests can only drag in straight lines, so they use fixed levels instead of LEVELS[0].
+        let arguments = ProcessInfo.processInfo.arguments
+        if index == 0, arguments.contains("-uiTestStraightLevel") {
             return Level(id: 1, dots: [
                 Dot(x: -0.6, y: -0.4, color: 0), Dot(x: 0.6, y: -0.4, color: 0),
                 Dot(x: -0.6, y: 0, color: 1), Dot(x: 0.6, y: 0, color: 1),
                 Dot(x: -0.6, y: 0.4, color: 2), Dot(x: 0.6, y: 0.4, color: 2),
             ])
         }
+        if index == 0, arguments.contains("-uiTestCrossLevel") {
+            return Level(id: 1, dots: [
+                Dot(x: 0, y: -0.8, color: 0), Dot(x: 0, y: 0.8, color: 0),
+                Dot(x: -0.6, y: 0.4, color: 1), Dot(x: 0.6, y: 0.4, color: 1),
+                Dot(x: -0.6, y: -0.4, color: 2), Dot(x: 0.6, y: -0.4, color: 2),
+            ])
+        }
         #endif
         return LEVELS[index]
     }
 
-    var isLastLevel: Bool { levelIndex >= LEVELS.count - 1 }
+    /// Next level that has dots; blank levels are skipped.
+    var nextLevelIndex: Int? {
+        LEVELS.indices.first { $0 > levelIndex && !LEVELS[$0].dots.isEmpty }
+    }
+
+    var isLastLevel: Bool { nextLevelIndex == nil }
     var connectedCount: Int { game.paths.count }
 
     /// True while something on the board is animating (pulsing dot or fading cross).
@@ -105,7 +118,7 @@ final class GameModel: ObservableObject {
             if now >= blockedUntil { notify.notificationOccurred(.warning) }
             blockedAt = game.blocked
             blockedUntil = now.addingTimeInterval(0.7)
-            let message = Self.blockMessages[game.blockReason ?? .line] ?? "此路不通"
+            let message = Self.blockMessages[game.blockReason ?? .line] ?? "Blocked"
             lastBlockMessage = message
             showToast(message)
         case .connected:
