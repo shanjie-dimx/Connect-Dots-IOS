@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension Color {
     init(hex: UInt32, opacity: Double = 1) {
@@ -80,6 +81,44 @@ struct AppBackground: View {
             )
         }
         .ignoresSafeArea()
+    }
+}
+
+/// Names of the scene images in Assets.xcassets. Missing images fall back to a gradient.
+enum SceneArt {
+    static let mapName = "Map"
+
+    static func backgroundName(chapter: Int) -> String {
+        String(format: "Background%02d", chapter + 1)
+    }
+
+    fileprivate static let fallbacks: [(UInt32, UInt32)] = [
+        (0x0EA5E9, 0x1E3A8A), (0x22C55E, 0x14532D), (0xF59E0B, 0x9A3412), (0x06B6D4, 0x164E63),
+        (0xA855F7, 0x4C1D95), (0xEC4899, 0x831843), (0x84CC16, 0x365314), (0xF97316, 0x7C2D12),
+        (0x6366F1, 0x1E1B4B), (0x14B8A6, 0x134E4A), (0xEF4444, 0x450A0A), (0x64748B, 0x0F172A),
+    ]
+}
+
+/// Full-screen scene picture behind the map or a level.
+struct SceneBackground: View {
+    let name: String
+    let fallback: Int
+
+    var body: some View {
+        Color.clear
+            .overlay {
+                if let image = UIImage(named: name) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    let colors = SceneArt.fallbacks[fallback % SceneArt.fallbacks.count]
+                    LinearGradient(colors: [Color(hex: colors.0), Color(hex: colors.1)], startPoint: .top, endPoint: .bottom)
+                }
+            }
+            .clipped()
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 
