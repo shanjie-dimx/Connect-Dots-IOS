@@ -40,17 +40,24 @@ private let simple = Level(id: 0, dots: [
 ])
 
 final class GameTests: XCTestCase {
-    func testThereAreTwentyLevels() {
-        XCTAssertEqual(LEVELS.count, 20)
-        for (i, level) in LEVELS.enumerated() {
-            XCTAssertEqual(level.dots.count, i < 10 ? 6 : 8, "level \(i + 1)")
+    func testThereAre120LevelsGoingFromThreeToTenPairs() {
+        XCTAssertEqual(LEVELS.count, 120)
+        var previous = 3
+        for (i, level) in LEVELS.enumerated() where !level.dots.isEmpty {
+            let pairs = level.dots.count / 2
+            XCTAssertEqual(level.dots.count, pairs * 2, "level \(i + 1)")
+            XCTAssertEqual(Set(level.dots.map(\.color)).count, pairs, "level \(i + 1)")
+            XCTAssertGreaterThanOrEqual(pairs, previous, "level \(i + 1)")
+            previous = pairs
         }
+        XCTAssertTrue(LEVELS[0..<10].allSatisfy { $0.dots.count == 6 })
+        XCTAssertEqual(LEVELS.last(where: { !$0.dots.isEmpty })?.dots.count, 20)
     }
 
     func testEveryLevelCanBeSolvedByDrawingItsReferenceSolution() throws {
         let solutions = try loadSolutions()
         XCTAssertEqual(solutions.count, LEVELS.count)
-        for (i, level) in LEVELS.enumerated() {
+        for (i, level) in LEVELS.enumerated() where !level.dots.isEmpty {
             let game = Game(level: level)
             for key in solutions[i].keys.sorted() {
                 let pts = solutions[i][key]!.map { pt($0[0], $0[1]) }
