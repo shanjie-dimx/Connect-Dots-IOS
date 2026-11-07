@@ -9,7 +9,7 @@ final class SoundPlayer: ObservableObject {
     }
 
     static let shared = SoundPlayer()
-    private static let mutedKey = "color-link-muted"
+    private static let mutedKey = "connect-dots-muted"
 
     @Published var isMuted: Bool {
         didSet { UserDefaults.standard.set(isMuted, forKey: Self.mutedKey) }

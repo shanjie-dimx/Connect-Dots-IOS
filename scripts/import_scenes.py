@@ -17,7 +17,7 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PICS = os.path.join(ROOT, "pics")
-ASSETS = os.path.join(ROOT, "ColorLink", "Assets.xcassets")
+ASSETS = os.path.join(ROOT, "ConnectDots", "Assets.xcassets")
 
 MAP = "asset_dByosQhHXXxQH1J2puhfKVHz"
 SCENES = [

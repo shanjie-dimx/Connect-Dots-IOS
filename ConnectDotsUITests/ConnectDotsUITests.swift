@@ -1,7 +1,7 @@
 import XCTest
 
 /// Drives the real app with touch drags on fixed test levels.
-final class ColorLinkUITests: XCTestCase {
+final class ConnectDotsUITests: XCTestCase {
     // Dots of the -uiTestCrossLevel level (see GameModel), keyed by color.
     private let pairs: [Int: (CGPoint, CGPoint)] = [
         0: (CGPoint(x: 0, y: -0.8), CGPoint(x: 0, y: 0.8)),

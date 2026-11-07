@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C0110000000000000000E001"
-               BuildableName = "ColorLink.app"
-               BlueprintName = "ColorLink"
-               ReferencedContainer = "container:ColorLink.xcodeproj">
+               BuildableName = "ConnectDots.app"
+               BlueprintName = "ConnectDots"
+               ReferencedContainer = "container:ConnectDots.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C0110000000000000000E201"
-               BuildableName = "ColorLinkTests.xctest"
-               BlueprintName = "ColorLinkTests"
-               ReferencedContainer = "container:ColorLink.xcodeproj">
+               BuildableName = "ConnectDotsTests.xctest"
+               BlueprintName = "ConnectDotsTests"
+               ReferencedContainer = "container:ConnectDots.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -43,9 +43,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C0110000000000000000E101"
-               BuildableName = "ColorLinkUITests.xctest"
-               BlueprintName = "ColorLinkUITests"
-               ReferencedContainer = "container:ColorLink.xcodeproj">
+               BuildableName = "ConnectDotsUITests.xctest"
+               BlueprintName = "ConnectDotsUITests"
+               ReferencedContainer = "container:ConnectDots.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -65,9 +65,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C0110000000000000000E001"
-            BuildableName = "ColorLink.app"
-            BlueprintName = "ColorLink"
-            ReferencedContainer = "container:ColorLink.xcodeproj">
+            BuildableName = "ConnectDots.app"
+            BlueprintName = "ConnectDots"
+            ReferencedContainer = "container:ConnectDots.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -82,9 +82,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C0110000000000000000E001"
-            BuildableName = "ColorLink.app"
-            BlueprintName = "ColorLink"
-            ReferencedContainer = "container:ColorLink.xcodeproj">
+            BuildableName = "ConnectDots.app"
+            BlueprintName = "ConnectDots"
+            ReferencedContainer = "container:ConnectDots.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

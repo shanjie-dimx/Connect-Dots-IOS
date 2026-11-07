@@ -4,10 +4,10 @@ A native SwiftUI puzzle for iPhone and iPad (iOS 16+). Connect dots of the same 
 
 ## Run on iPhone
 
-1. Open `ColorLink.xcodeproj` with Xcode 15 or later (open the project file, not the folder).
+1. Open `ConnectDots.xcodeproj` with Xcode 15 or later (open the project file, not the folder).
 2. Pick an iPhone simulator or a connected iPhone as the run destination.
-3. For a real device, select the `ColorLink` target → Signing & Capabilities and choose your Team.
-   - To ship it, change the bundle identifier `com.simplegamesforiq.colorlink` to your own.
+3. For a real device, select the `ConnectDots` target → Signing & Capabilities and choose your Team.
+   - To ship it, change the bundle identifier `com.simplegamesforiq.connectdots` to your own.
 4. Press `⌘R`.
 
 ## Adventure map and scenes
@@ -19,7 +19,7 @@ The game is a journey over the adventure map from the beach at the bottom to the
 
 Tap a location on the map to open it: its background fills the screen and its 10 levels float on top. Opening a level shows the same background first, then the circle puzzle floats in over it.
 
-The source images are in `pics/`. `scripts/import_scenes.py` converts them to JPEG and writes the `Map` and `Background01` to `Background12` image sets in `ColorLink/Assets.xcassets`; the order of locations is set there and in `SceneArt.locations` (`ColorLink/App/Theme.swift`), which also holds each location's position on the map.
+The source images are in `pics/`. `scripts/import_scenes.py` converts them to JPEG and writes the `Map` and `Background01` to `Background12` image sets in `ConnectDots/Assets.xcassets`; the order of locations is set there and in `SceneArt.locations` (`ConnectDots/App/Theme.swift`), which also holds each location's position on the map.
 
 ## Effects and sounds
 
@@ -27,7 +27,7 @@ The source images are in `pics/`. `scripts/import_scenes.py` converts them to JP
 - Connecting a pair throws sparks out of both dots; a blocked line shakes the board.
 - Winning rains confetti and pops three stars on the win card.
 
-The speaker button on the map and location screens mutes everything (the setting is remembered). Sounds use the ambient audio session, so the silent switch mutes them and the player's music keeps playing. The WAV files in `ColorLink/Sounds/` are synthesized by `scripts/make_sounds.py`; edit and rerun it to change them.
+The speaker button on the map and location screens mutes everything (the setting is remembered). Sounds use the ambient audio session, so the silent switch mutes them and the player's music keeps playing. The WAV files in `ConnectDots/Sounds/` are synthesized by `scripts/make_sounds.py`; edit and rerun it to change them.
 
 ## Levels
 
@@ -46,24 +46,24 @@ Regenerate levels and solutions with:
 python3 scripts/generate_levels.py
 ```
 
-It writes `ColorLink/Core/Levels.swift` and `Tests/ColorLinkCoreTests/solutions.json`.
+It writes `ConnectDots/Core/Levels.swift` and `Tests/ConnectDotsCoreTests/solutions.json`.
 
 ## Layout
 
 ```
-├── ColorLink.xcodeproj       iPhone app project; builds ColorLink.app
-├── ColorLink/
+├── ConnectDots.xcodeproj       iPhone app project; builds ConnectDots.app
+├── ConnectDots/
 │   ├── App/                  SwiftUI screens: adventure map, scene backgrounds, board, win card, progress
 │   ├── Core/                 Rules engine and the generated levels
 │   └── Assets.xcassets       App icon, logo, map and chapter backgrounds
-├── ColorLinkUITests/         Drives the app in the simulator with real drags
-├── Tests/ColorLinkCoreTests  Rules unit tests, including replaying every level's solution
+├── ConnectDotsUITests/         Drives the app in the simulator with real drags
+├── Tests/ConnectDotsCoreTests  Rules unit tests, including replaying every level's solution
 └── scripts/                  generate_levels.py, import_scenes.py
 ```
 
 ## Tests
 
 ```bash
-xcodebuild test -project ColorLink.xcodeproj -scheme ColorLink \
+xcodebuild test -project ConnectDots.xcodeproj -scheme ConnectDots \
   -destination 'platform=iOS Simulator,name=iPhone 16'
 ```

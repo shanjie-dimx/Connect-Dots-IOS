@@ -2,7 +2,7 @@ import Foundation
 
 /// Remembers which levels have been solved, persisted in UserDefaults.
 final class ProgressStore: ObservableObject {
-    private static let key = "color-link-progress-v2"
+    private static let key = "connect-dots-progress-v2"
 
     @Published private(set) var solved: Set<Int>
     private let defaults: UserDefaults
