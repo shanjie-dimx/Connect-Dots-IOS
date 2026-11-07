@@ -21,6 +21,14 @@ Tap a location on the map to open it: its background fills the screen and its 10
 
 The source images are in `pics/`. `scripts/import_scenes.py` converts them to JPEG and writes the `Map` and `Background01` to `Background12` image sets in `ColorLink/Assets.xcassets`; the order of locations is set there and in `SceneArt.locations` (`ColorLink/App/Theme.swift`), which also holds each location's position on the map.
 
+## Effects and sounds
+
+- Picking up a dot, connecting a pair, getting blocked, undo/reset, buttons, the board floating in and winning each have a short sound.
+- Connecting a pair throws sparks out of both dots; a blocked line shakes the board.
+- Winning rains confetti and pops three stars on the win card.
+
+The speaker button on the map and location screens mutes everything (the setting is remembered). Sounds use the ambient audio session, so the silent switch mutes them and the player's music keeps playing. The WAV files in `ColorLink/Sounds/` are synthesized by `scripts/make_sounds.py`; edit and rerun it to change them.
+
 ## Levels
 
 120 levels in 12 chapters of 10. They go from 3 pairs of dots up to 10 pairs and get harder along the way:

@@ -30,7 +30,7 @@ struct HomeView: View {
                                 solved: SceneArt.levels(in: i).filter { progress.isSolved($0 + 1) }.count,
                                 total: SceneArt.levels(in: i).filter { !LEVELS[$0].dots.isEmpty }.count,
                                 isCurrent: i == currentLocation,
-                                action: { onSelectLocation(i) }
+                                action: { SoundPlayer.shared.play(.tap); onSelectLocation(i) }
                             )
                             .id(i)
                             .position(x: location.x * width, y: location.y * height)
@@ -68,6 +68,7 @@ struct HomeView: View {
                 .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
                 .accessibilityLabel("Connect Dots")
             Spacer()
+            SoundToggle()
             Text("Solved \(progress.solved.count) / \(playableCount)")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(.white)

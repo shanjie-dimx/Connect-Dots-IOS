@@ -51,6 +51,9 @@ struct BoardView: View {
         for dot in game.dots {
             drawDot(&ctx, layout, dot, now: now)
         }
+        for burst in model.bursts where burst.isActive(at: now) {
+            burst.draw(in: &ctx, layout: layout, now: now)
+        }
         if let blocked = model.blockedAt, now < model.blockedUntil {
             drawCross(&ctx, layout, blocked, fade: min(1, model.blockedUntil.timeIntervalSince(now) / 0.25))
         }

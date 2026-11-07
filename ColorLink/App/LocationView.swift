@@ -16,7 +16,7 @@ struct LocationView: View {
         let next = progress.nextUnsolvedIndex(levels: LEVELS)
         VStack(spacing: 14) {
             HStack(spacing: 12) {
-                Button(action: onBack) { Image(systemName: "map.fill") }
+                Button { SoundPlayer.shared.play(.tap); onBack() } label: { Image(systemName: "map.fill") }
                     .buttonStyle(IconButtonStyle())
                     .accessibilityLabel("Back to map")
                 VStack(spacing: 2) {
@@ -31,7 +31,7 @@ struct LocationView: View {
                 .padding(.horizontal, 14)
                 .background(.black.opacity(0.4), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .frame(maxWidth: .infinity)
-                Color.clear.frame(width: 44, height: 44)
+                SoundToggle()
             }
 
             Spacer()
@@ -44,7 +44,7 @@ struct LocationView: View {
                             done: progress.isSolved(i + 1),
                             isNext: i == next,
                             isEmpty: LEVELS[i].dots.isEmpty,
-                            action: { onSelectLevel(i) }
+                            action: { SoundPlayer.shared.play(.tap); onSelectLevel(i) }
                         )
                     }
                 }

@@ -25,6 +25,8 @@ struct PlayView: View {
                 toast
             }
             .animation(.easeOut(duration: 0.2), value: model.toast)
+            .modifier(ShakeEffect(animatableData: CGFloat(model.shakes)))
+            .animation(.linear(duration: 0.35), value: model.shakes)
             .shadow(color: .black.opacity(0.45), radius: 24, y: 18)
             .scaleEffect(boardVisible ? 1 : 0.7)
             .offset(y: boardVisible ? 0 : 60)
@@ -52,6 +54,7 @@ struct PlayView: View {
                 return
             }
             try? await Task.sleep(nanoseconds: 450_000_000)
+            SoundPlayer.shared.play(.whoosh, volume: 0.6)
             withAnimation(.spring(response: 0.55, dampingFraction: 0.72)) { boardVisible = true }
         }
         .overlay {
@@ -61,8 +64,9 @@ struct PlayView: View {
                     levelNumber: model.levelIndex + 1,
                     solvedCount: progress.solved.count,
                     totalCount: LEVELS.filter { !$0.dots.isEmpty }.count,
-                    onReplay: { onSelectLevel(model.levelIndex) },
+                    onReplay: { SoundPlayer.shared.play(.tap); onSelectLevel(model.levelIndex) },
                     onNext: {
+                        SoundPlayer.shared.play(.tap)
                         if let next = model.nextLevelIndex { onSelectLevel(next) } else { onHome() }
                     }
                 )
@@ -77,7 +81,7 @@ struct PlayView: View {
 
     private var topBar: some View {
         HStack(spacing: 12) {
-            Button(action: onHome) { Image(systemName: "chevron.left") }
+            Button { SoundPlayer.shared.play(.tap); onHome() } label: { Image(systemName: "chevron.left") }
                 .buttonStyle(IconButtonStyle())
                 .accessibilityLabel("Back to levels")
             VStack(spacing: 2) {
@@ -93,7 +97,10 @@ struct PlayView: View {
             .padding(.horizontal, 16)
             .background(.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .frame(maxWidth: .infinity)
-            Button { if let next = model.nextLevelIndex { onSelectLevel(next) } } label: { Image(systemName: "chevron.right") }
+            Button {
+                SoundPlayer.shared.play(.tap)
+                if let next = model.nextLevelIndex { onSelectLevel(next) }
+            } label: { Image(systemName: "chevron.right") }
                 .buttonStyle(IconButtonStyle())
                 .disabled(model.isLastLevel)
                 .accessibilityLabel("Next level")
@@ -143,13 +150,29 @@ private struct WinCard: View {
 
     @State private var appeared = false
     @State private var spin = false
+    @State private var stars = 0
 
     var body: some View {
         ZStack {
             Color(hex: 0x0F0A28, opacity: 0.55)
                 .background(.ultraThinMaterial.opacity(0.4))
                 .ignoresSafeArea()
+            ConfettiView()
             VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    ForEach(0..<3, id: \.self) { i in
+                        Image(systemName: "star.fill")
+                            .font(.system(size: i == 1 ? 44 : 34))
+                            .foregroundStyle(Theme.accent)
+                            .shadow(color: Color(hex: 0xF59E0B).opacity(0.8), radius: 8)
+                            .scaleEffect(stars > i ? 1 : 0.01)
+                            .rotationEffect(.degrees(stars > i ? 0 : -90))
+                            .offset(y: i == 1 ? -6 : 0)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.2 + Double(i) * 0.18), value: stars)
+                    }
+                }
+                .padding(.bottom, 4)
+                .accessibilityHidden(true)
                 Text(isLast ? "All clear!" : "Solved!")
                     .font(.system(size: 32, weight: .heavy))
                     .kerning(2)
@@ -191,6 +214,7 @@ private struct WinCard: View {
         .onAppear {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) { appeared = true }
             withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) { spin = true }
+            stars = 3
         }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isModal)

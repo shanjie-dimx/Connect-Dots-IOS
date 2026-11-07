@@ -24,6 +24,11 @@ final class GameModel: ObservableObject {
     private(set) var lastBlockMessage: String?
     private(set) var blockedAt: Point?
     private(set) var blockedUntil = Date.distantPast
+    /// Sparks at both ends of every pair that just connected.
+    private(set) var bursts: [Burst] = []
+    /// Bumped on each new block so the board can shake.
+    @Published private(set) var shakes = 0
+    private let sound = SoundPlayer.shared
 
     private var dragState = DragState.idle
     private var toastTask: Task<Void, Never>?
@@ -68,7 +73,7 @@ final class GameModel: ObservableObject {
 
     /// True while something on the board is animating (pulsing dot or fading cross).
     func isAnimating(at now: Date) -> Bool {
-        game.active != nil || (blockedAt != nil && now < blockedUntil)
+        game.active != nil || (blockedAt != nil && now < blockedUntil) || bursts.contains { $0.isActive(at: now) }
     }
 
     func dragChanged(start: Point, location: Point) {
@@ -79,6 +84,7 @@ final class GameModel: ObservableObject {
             if game.pointerDown(start) {
                 dragState = .drawing
                 impact.prepare()
+                sound.play(.pick, volume: 0.7)
                 move(to: location)
             } else {
                 dragState = .ignoring
@@ -98,24 +104,29 @@ final class GameModel: ObservableObject {
     }
 
     func undo() {
-        game.undo()
+        if game.undo() { sound.play(.undo) }
         dragState = .idle
         lastBlockMessage = nil
         changed()
     }
 
     func reset() {
-        game.reset()
+        if game.reset() { sound.play(.undo) }
         dragState = .idle
         lastBlockMessage = nil
         changed()
     }
 
     private func move(to location: Point) {
+        let color = game.active?.color
         switch game.pointerMove(location) {
         case .blocked:
             let now = Date()
-            if now >= blockedUntil { notify.notificationOccurred(.warning) }
+            if now >= blockedUntil {
+                notify.notificationOccurred(.warning)
+                sound.play(.blocked)
+                shakes += 1
+            }
             blockedAt = game.blocked
             blockedUntil = now.addingTimeInterval(0.7)
             let message = Self.blockMessages[game.blockReason ?? .line] ?? "Blocked"
@@ -124,6 +135,14 @@ final class GameModel: ObservableObject {
         case .connected:
             dragState = .ignoring
             impact.impactOccurred()
+            sound.play(.connect)
+            if let color {
+                let now = Date()
+                bursts.removeAll { !$0.isActive(at: now) }
+                for dot in game.dots where dot.color == color {
+                    bursts.append(Burst(center: dot.point, color: color, start: now))
+                }
+            }
             if game.isSolved { scheduleWin() }
         case .moved, .none:
             break
@@ -152,6 +171,7 @@ final class GameModel: ObservableObject {
             try? await Task.sleep(nanoseconds: 600_000_000)
             guard let self, !Task.isCancelled, self.game.isSolved else { return }
             self.notify.notificationOccurred(.success)
+            self.sound.play(.win)
             self.showWin = true
         }
     }
