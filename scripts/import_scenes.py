@@ -1,22 +1,46 @@
 #!/usr/bin/env python3
-"""Copies the adventure map and the 12 chapter backgrounds into Assets.xcassets.
+"""Copies the adventure map and the 12 location backgrounds from pics/ into Assets.xcassets.
 
-Usage:
-  python3 scripts/import_scenes.py MAP_IMAGE BG1 BG2 ... BG12
-  python3 scripts/import_scenes.py FOLDER
+Usage: python3 scripts/import_scenes.py
 
-With a folder, the image whose name contains "map" becomes the map and the remaining
-images, sorted by file name, become chapters 1 to 12.
+Images are matched by the asset id at the end of their file name, in the order of
+SCENES below (location 1 at the bottom of the map to location 12 at the top). They are
+saved as JPEG to keep the app small. Requires Pillow (pip install pillow).
 """
 
+import glob
 import json
 import os
 import shutil
-import sys
+
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PICS = os.path.join(ROOT, "pics")
 ASSETS = os.path.join(ROOT, "ColorLink", "Assets.xcassets")
-IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg")
+
+MAP = "asset_dByosQhHXXxQH1J2puhfKVHz"
+SCENES = [
+    "asset_9TdUVJiJ7TLy3WpngaLB5PWd",  # 1 Sunny Beach: tropical beach
+    "asset_p9LdiCnRsRcGya8bjiXEFXjr",  # 2 Coral Reef: underwater coral reef
+    "asset_7SVygi58jsxJNQwKRMybc71F",  # 3 Pirate Wreck: sunken pirate ship
+    "asset_Hgf675tnWBKaLveSBXW5ZJ2C",  # 4 Palm Oasis: tropical oasis lagoon
+    "asset_fBLfNa8mkoFkKxp1QbCkoFsm",  # 5 Golden Dunes: desert sand dunes
+    "asset_hZPvQDJ2mbAzGc2Sw8r42PQA",  # 6 Lost Ruins: ruins among the dunes
+    "asset_fJybPAvEJ5Co5VADdgcNEhrs",  # 7 Jungle River: jungle and river
+    "asset_rZbBBDjSyoRhRLuDWxAqUXVJ",  # 8 Thunder Falls: tropical waterfall
+    "asset_eGkh8BUdvMs9BPpzW5ZKTG9S",  # 9 Mushroom Grove: glowing mushrooms
+    "asset_T2razUsHdQKS2k2Wn8S99Bt9",  # 10 Crystal Cave: icicle cave
+    "asset_VXvKnJPQ14eUyB5N7rGA2JvJ",  # 11 Aurora Peak: auroras at night
+    "asset_mzn7KV2WzVw1E82ayD8uH31D",  # 12 Sky Summit: sun above the clouds
+]
+
+
+def find(asset_id):
+    matches = glob.glob(os.path.join(PICS, "*%s*" % asset_id))
+    if len(matches) != 1:
+        raise SystemExit("expected one image for %s in pics/, found %d" % (asset_id, len(matches)))
+    return matches[0]
 
 
 def add_imageset(name, source):
@@ -24,29 +48,19 @@ def add_imageset(name, source):
     if os.path.isdir(folder):
         shutil.rmtree(folder)
     os.makedirs(folder)
-    filename = name.lower() + os.path.splitext(source)[1].lower()
-    shutil.copyfile(source, os.path.join(folder, filename))
+    filename = name.lower() + ".jpg"
+    Image.open(source).convert("RGB").save(os.path.join(folder, filename), quality=85, optimize=True)
     with open(os.path.join(folder, "Contents.json"), "w") as f:
         json.dump({"images": [{"filename": filename, "idiom": "universal"}], "info": {"author": "xcode", "version": 1}}, f, indent=2)
-    print("%-14s <- %s" % (name, source))
+        f.write("\n")
+    print("%-14s <- %s" % (name, os.path.basename(source)))
 
 
-def main(args):
-    if len(args) == 1 and os.path.isdir(args[0]):
-        files = sorted(
-            os.path.join(args[0], f) for f in os.listdir(args[0]) if f.lower().endswith(IMAGE_EXTENSIONS)
-        )
-        maps = [f for f in files if "map" in os.path.basename(f).lower()]
-        if len(maps) != 1:
-            sys.exit("expected exactly one image with 'map' in its name, found %d" % len(maps))
-        backgrounds = [f for f in files if f != maps[0]]
-        args = [maps[0]] + backgrounds
-    if len(args) != 13:
-        sys.exit("expected 1 map and 12 backgrounds, got %d images" % len(args))
-    add_imageset("Map", args[0])
-    for i, path in enumerate(args[1:], start=1):
-        add_imageset("Background%02d" % i, path)
+def main():
+    add_imageset("Map", find(MAP))
+    for i, asset_id in enumerate(SCENES, start=1):
+        add_imageset("Background%02d" % i, find(asset_id))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

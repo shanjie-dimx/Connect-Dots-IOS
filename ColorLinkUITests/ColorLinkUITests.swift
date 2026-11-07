@@ -19,9 +19,12 @@ final class ColorLinkUITests: XCTestCase {
     func testDrawingLinesOnLevelOne() throws {
         app.launchArguments = ["-uiTestCrossLevel"]
         app.launch()
+        let location = app.buttons["location-1"]
+        XCTAssertTrue(location.waitForExistence(timeout: 10))
+        saveScreenshot("01-map")
+        location.tap()
         let levelButton = app.buttons["level-1"]
-        XCTAssertTrue(levelButton.waitForExistence(timeout: 10))
-        saveScreenshot("01-home")
+        XCTAssertTrue(levelButton.waitForExistence(timeout: 5))
         levelButton.tap()
 
         let board = app.descendants(matching: .any)["board"]
@@ -52,6 +55,9 @@ final class ColorLinkUITests: XCTestCase {
     func testSolvingALevelShowsTheWinCardAndSavesProgress() throws {
         app.launchArguments = ["-uiTestStraightLevel"]
         app.launch()
+        XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 10))
+        app.buttons["location-1"].tap()
+        XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 5))
         app.buttons["level-1"].tap()
         let board = app.descendants(matching: .any)["board"]
         XCTAssertTrue(board.waitForExistence(timeout: 5))
@@ -66,7 +72,7 @@ final class ColorLinkUITests: XCTestCase {
         XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 3))
         XCTAssertEqual(app.buttons["level-1"].label, "Level 1 (solved)")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Solved 1 / ")).firstMatch.exists)
-        saveScreenshot("05-home-progress")
+        saveScreenshot("05-location-progress")
     }
 
     private func drag(color: Int, on board: XCUIElement) {
