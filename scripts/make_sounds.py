@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Synthesizes the game's short sound effects into ColorLink/Sounds/*.wav.
+"""Synthesizes the game's short sound effects into ConnectDots/Sounds/*.wav.
 
 Usage: python3 scripts/make_sounds.py
 """
@@ -11,7 +11,7 @@ import struct
 import wave
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "ColorLink", "Sounds")
+OUT = os.path.join(ROOT, "ConnectDots", "Sounds")
 RATE = 44100
 
 

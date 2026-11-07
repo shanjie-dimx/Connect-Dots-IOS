@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import ColorLink
+@testable import ConnectDots
 
 private func pt(_ x: Double, _ y: Double) -> Point { Point(x: x, y: y) }
 

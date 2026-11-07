@@ -2,11 +2,11 @@
 """Generates the 120 levels and a reference solution for each one.
 
 Every level is accepted only after a full solution has been found and replayed through a
-port of ColorLink/Core (Game.pointerDown/Move and validateSolution), so all levels are solvable.
+port of ConnectDots/Core (Game.pointerDown/Move and validateSolution), so all levels are solvable.
 
 Writes:
-  ColorLink/Core/Levels.swift
-  Tests/ColorLinkCoreTests/solutions.json
+  ConnectDots/Core/Levels.swift
+  Tests/ConnectDotsCoreTests/solutions.json
 
 Usage: python3 scripts/generate_levels.py
 """
@@ -22,7 +22,7 @@ LEVEL_COUNT = 120
 SEED = 20261107
 MAX_TRIES = 6000
 
-# Mirrors ColorLink/Core/Geometry.swift.
+# Mirrors ConnectDots/Core/Geometry.swift.
 DOT_RADIUS = 0.085
 LINE_WIDTH = 0.06
 HALF_WIDTH = LINE_WIDTH / 2
@@ -30,7 +30,7 @@ LINE_SEPARATION = LINE_WIDTH * 0.95
 DOT_CLEARANCE = DOT_RADIUS + HALF_WIDTH
 BOARD_LIMIT = 1 - HALF_WIDTH
 
-# Mirrors ColorLink/Core/Game.swift.
+# Mirrors ConnectDots/Core/Game.swift.
 STEP = 0.02
 MIN_STEP = 0.012
 BACKTRACK_RADIUS = 0.045
@@ -130,7 +130,7 @@ def validate_solution(dots, paths):
 
 
 class Game:
-    """Port of ColorLink/Core/Game.swift, used to replay the reference solutions."""
+    """Port of ConnectDots/Core/Game.swift, used to replay the reference solutions."""
 
     def __init__(self, dots):
         self.dots = dots
@@ -574,13 +574,13 @@ def main():
         out.append("    ]),")
     out.append("]")
     out.append("")
-    with open(os.path.join(ROOT, "ColorLink/Core/Levels.swift"), "w") as f:
+    with open(os.path.join(ROOT, "ConnectDots/Core/Levels.swift"), "w") as f:
         f.write("\n".join(out))
 
     solutions = []
     for lv in ordered:
         solutions.append({str(c): [[r4(x), r4(y)] for (x, y) in pts] for c, pts in sorted(lv["solution"].items())})
-    with open(os.path.join(ROOT, "Tests/ColorLinkCoreTests/solutions.json"), "w") as f:
+    with open(os.path.join(ROOT, "Tests/ConnectDotsCoreTests/solutions.json"), "w") as f:
         json.dump(solutions, f, separators=(",", ":"))
         f.write("\n")
 

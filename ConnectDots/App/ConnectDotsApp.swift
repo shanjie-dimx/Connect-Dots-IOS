@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ColorLinkApp: App {
+struct ConnectDotsApp: App {
     @StateObject private var progress = ProgressStore()
 
     var body: some Scene {
