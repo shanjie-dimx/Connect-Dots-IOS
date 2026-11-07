@@ -29,14 +29,14 @@ struct BoardView: View {
         }
         .accessibilityElement()
         .accessibilityIdentifier("board")
-        .accessibilityLabel("游戏棋盘")
+        .accessibilityLabel("Game board")
         .accessibilityValue(accessibilityValue)
     }
 
     private var accessibilityValue: String {
-        let status = "已连接 \(model.connectedCount) / \(model.game.colors.count)"
+        let status = "Connected \(model.connectedCount) / \(model.game.colors.count)"
         guard let message = model.lastBlockMessage else { return status }
-        return "\(status)，\(message)"
+        return "\(status), \(message)"
     }
 
     private func draw(in ctx: inout GraphicsContext, layout: BoardLayout, now: Date) {
@@ -102,7 +102,7 @@ struct BoardView: View {
         var path = Path()
         path.addLines(points.map(l.toScreen))
         let w = Geometry.lineWidth * l.radius
-        let palette = Theme.palette[color]
+        let palette = Theme.palette[color % Theme.palette.count]
         var layer = ctx
         layer.opacity = alpha
         func style(_ width: Double) -> StrokeStyle { StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round) }
@@ -117,7 +117,7 @@ struct BoardView: View {
         let game = model.game
         let connected = game.paths[dot.color] != nil
         let active = game.active?.color == dot.color
-        let palette = Theme.palette[dot.color]
+        let palette = Theme.palette[dot.color % Theme.palette.count]
         func circle(_ radius: Double) -> Path {
             Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
         }

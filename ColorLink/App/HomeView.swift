@@ -4,14 +4,28 @@ struct HomeView: View {
     @EnvironmentObject private var progress: ProgressStore
     let onSelectLevel: (Int) -> Void
 
+    static let levelsPerChapter = 10
+    private static let chapterNames = [
+        "Warm-up", "Beginner", "Easy", "Steady", "Tricky", "Twisty",
+        "Hard", "Harder", "Expert", "Master", "Genius", "Legend",
+    ]
+
+    private var playableCount: Int { LEVELS.filter { !$0.dots.isEmpty }.count }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 hero
                 rules
-                levelGroup(title: "入门 · 六个点", subtitle: "第 1–10 关", range: 0..<10)
-                levelGroup(title: "进阶 · 八个点", subtitle: "第 11–20 关", range: 10..<20)
-                Text("已通过 \(progress.solved.count) / \(LEVELS.count) 关")
+                ForEach(0..<chapterCount, id: \.self) { chapter in
+                    let range = chapterRange(chapter)
+                    levelGroup(
+                        title: "Chapter \(chapter + 1) · \(Self.chapterNames[chapter % Self.chapterNames.count])",
+                        subtitle: "Levels \(range.lowerBound + 1)–\(range.upperBound) · \(pairsLabel(range))",
+                        range: range
+                    )
+                }
+                Text("Solved \(progress.solved.count) / \(playableCount)")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.muted)
             }
@@ -23,18 +37,33 @@ struct HomeView: View {
         .scrollIndicators(.hidden)
     }
 
+    private var chapterCount: Int {
+        (LEVELS.count + Self.levelsPerChapter - 1) / Self.levelsPerChapter
+    }
+
+    private func chapterRange(_ chapter: Int) -> Range<Int> {
+        let start = chapter * Self.levelsPerChapter
+        return start..<min(start + Self.levelsPerChapter, LEVELS.count)
+    }
+
+    private func pairsLabel(_ range: Range<Int>) -> String {
+        let counts = range.map { LEVELS[$0].dots.count / 2 }.filter { $0 > 0 }
+        guard let lo = counts.min(), let hi = counts.max() else { return "coming soon" }
+        return lo == hi ? "\(lo) pairs" : "\(lo)–\(hi) pairs"
+    }
+
     private var hero: some View {
         VStack(spacing: 4) {
             LogoMark()
                 .frame(width: 76, height: 76)
                 .shadow(color: .black.opacity(0.35), radius: 10, y: 8)
-            Text("同色连线")
+            Text("Color Link")
                 .font(.system(size: 40, weight: .black))
-                .kerning(4)
+                .kerning(2)
                 .foregroundStyle(Theme.titleGradient)
                 .shadow(color: .black.opacity(0.25), radius: 0, y: 3)
                 .padding(.top, 8)
-            Text("智商没有 120，都过不了这一关")
+            Text("Only a 120 IQ can clear every level")
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.muted)
         }
@@ -42,8 +71,8 @@ struct HomeView: View {
 
     private var rules: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("在圆内把\(Text("颜色相同").bold().foregroundColor(.white))的点连起来")
-            Text("线路\(Text("不能交叉").bold().foregroundColor(.white))，不能\(Text("穿过其他点").bold().foregroundColor(.white))，也不能\(Text("超出圆圈").bold().foregroundColor(.white))")
+            Text("Connect dots of the \(Text("same color").bold().foregroundColor(.white)) inside the circle")
+            Text("Lines \(Text("can't cross").bold().foregroundColor(.white)), can't \(Text("pass through other dots").bold().foregroundColor(.white)), and can't \(Text("leave the circle").bold().foregroundColor(.white))")
         }
         .font(.system(size: 14))
         .lineSpacing(4)
@@ -57,7 +86,7 @@ struct HomeView: View {
     }
 
     private func levelGroup(title: String, subtitle: String, range: Range<Int>) -> some View {
-        let next = progress.nextUnsolvedIndex(levelCount: LEVELS.count)
+        let next = progress.nextUnsolvedIndex(levels: LEVELS)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text(title).font(.system(size: 16, weight: .bold))
@@ -70,6 +99,7 @@ struct HomeView: View {
                         number: i + 1,
                         done: progress.isSolved(i + 1),
                         isNext: i == next,
+                        isEmpty: LEVELS[i].dots.isEmpty,
                         action: { onSelectLevel(i) }
                     )
                 }
@@ -82,6 +112,7 @@ private struct LevelButton: View {
     let number: Int
     let done: Bool
     let isNext: Bool
+    let isEmpty: Bool
     let action: () -> Void
 
     var body: some View {
@@ -112,10 +143,12 @@ private struct LevelButton: View {
                             .padding(-4)
                     }
                 }
+                .opacity(isEmpty ? 0.35 : 1)
         }
         .buttonStyle(PressableStyle())
         .foregroundStyle(.white)
-        .accessibilityLabel("第 \(number) 关\(done ? "（已通过）" : "")")
+        .disabled(isEmpty)
+        .accessibilityLabel("Level \(number)\(done ? " (solved)" : isEmpty ? " (coming soon)" : "")")
         .accessibilityIdentifier("level-\(number)")
     }
 }

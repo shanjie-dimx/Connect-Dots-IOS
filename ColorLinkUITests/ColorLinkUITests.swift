@@ -1,12 +1,12 @@
 import XCTest
 
-/// Drives the real app with touch drags on level 1.
+/// Drives the real app with touch drags on fixed test levels.
 final class ColorLinkUITests: XCTestCase {
-    // Level 1 dots (see src/levels.js), keyed by color.
+    // Dots of the -uiTestCrossLevel level (see GameModel), keyed by color.
     private let pairs: [Int: (CGPoint, CGPoint)] = [
-        0: (CGPoint(x: 0.4396, y: 0.6061), CGPoint(x: -0.3125, y: -0.86)),
-        1: (CGPoint(x: 0.8649, y: 0.2985), CGPoint(x: -0.782, y: -0.1194)),
-        2: (CGPoint(x: 0.6716, y: -0.6214), CGPoint(x: 0.8598, y: -0.3129)),
+        0: (CGPoint(x: 0, y: -0.8), CGPoint(x: 0, y: 0.8)),
+        1: (CGPoint(x: -0.6, y: 0.4), CGPoint(x: 0.6, y: 0.4)),
+        2: (CGPoint(x: -0.6, y: -0.4), CGPoint(x: 0.6, y: -0.4)),
     ]
 
     private var app: XCUIApplication!
@@ -14,10 +14,11 @@ final class ColorLinkUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launch()
     }
 
     func testDrawingLinesOnLevelOne() throws {
+        app.launchArguments = ["-uiTestCrossLevel"]
+        app.launch()
         let levelButton = app.buttons["level-1"]
         XCTAssertTrue(levelButton.waitForExistence(timeout: 10))
         saveScreenshot("01-home")
@@ -26,30 +27,29 @@ final class ColorLinkUITests: XCTestCase {
         let board = app.descendants(matching: .any)["board"]
         XCTAssertTrue(board.waitForExistence(timeout: 5))
         let sub = app.staticTexts["level-sub"]
-        XCTAssertEqual(sub.label, "6 个点 · 已连接 0/3")
+        XCTAssertEqual(sub.label, "3 pairs · 0/3 connected")
         saveScreenshot("02-level-1")
 
         drag(color: 2, on: board)
-        XCTAssertTrue(waitForLabel(sub, "6 个点 · 已连接 1/3"))
+        XCTAssertTrue(waitForLabel(sub, "3 pairs · 1/3 connected"))
         drag(color: 1, on: board)
-        XCTAssertTrue(waitForLabel(sub, "6 个点 · 已连接 2/3"))
+        XCTAssertTrue(waitForLabel(sub, "3 pairs · 2/3 connected"))
 
-        // A straight line for the last pair would cross the line just drawn.
+        // A straight line for the last pair would cross the lines just drawn.
         // The toast is gone ~1 s after release, which a slow simulator can miss; the board's
         // accessibility value keeps the reason until the next touch.
         drag(color: 0, on: board)
         saveScreenshot("03-blocked")
-        XCTAssertEqual(board.value as? String, "已连接 2 / 3，线路不能交叉")
-        XCTAssertEqual(sub.label, "6 个点 · 已连接 2/3")
+        XCTAssertEqual(board.value as? String, "Connected 2 / 3, Lines can't cross")
+        XCTAssertEqual(sub.label, "3 pairs · 2/3 connected")
 
         app.buttons["undo"].tap()
-        XCTAssertTrue(waitForLabel(sub, "6 个点 · 已连接 1/3"))
+        XCTAssertTrue(waitForLabel(sub, "3 pairs · 1/3 connected"))
         app.buttons["reset"].tap()
-        XCTAssertTrue(waitForLabel(sub, "6 个点 · 已连接 0/3"))
+        XCTAssertTrue(waitForLabel(sub, "3 pairs · 0/3 connected"))
     }
 
     func testSolvingALevelShowsTheWinCardAndSavesProgress() throws {
-        app.terminate()
         app.launchArguments = ["-uiTestStraightLevel"]
         app.launch()
         app.buttons["level-1"].tap()
@@ -58,14 +58,14 @@ final class ColorLinkUITests: XCTestCase {
         for y in [-0.4, 0, 0.4] {
             drag(from: CGPoint(x: -0.6, y: y), to: CGPoint(x: 0.6, y: y), on: board)
         }
-        XCTAssertTrue(app.staticTexts["过关！"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Solved!"].waitForExistence(timeout: 3))
         saveScreenshot("04-win")
-        app.buttons["再玩一次"].tap()
-        XCTAssertTrue(waitForLabel(app.staticTexts["level-sub"], "6 个点 · 已连接 0/3"))
-        app.buttons["返回关卡列表"].tap()
+        app.buttons["Play again"].tap()
+        XCTAssertTrue(waitForLabel(app.staticTexts["level-sub"], "3 pairs · 0/3 connected"))
+        app.buttons["Back to levels"].tap()
         XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 3))
-        XCTAssertEqual(app.buttons["level-1"].label, "第 1 关（已通过）")
-        XCTAssertTrue(app.staticTexts["已通过 1 / 20 关"].exists)
+        XCTAssertEqual(app.buttons["level-1"].label, "Level 1 (solved)")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Solved 1 / ")).firstMatch.exists)
         saveScreenshot("05-home-progress")
     }
 

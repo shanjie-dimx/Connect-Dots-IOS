@@ -18,11 +18,18 @@ struct DotPalette {
 }
 
 enum Theme {
+    /// One entry per color index; levels use up to 10 pairs.
     static let palette: [DotPalette] = [
         DotPalette(fill: Color(hex: 0xF43F5E), dark: Color(hex: 0x9F1239)),
         DotPalette(fill: Color(hex: 0x22C55E), dark: Color(hex: 0x166534)),
-        DotPalette(fill: Color(hex: 0x3B82F6), dark: Color(hex: 0x1E3A8A)),
+        DotPalette(fill: Color(hex: 0x2563EB), dark: Color(hex: 0x1E3A8A)),
         DotPalette(fill: Color(hex: 0xFACC15), dark: Color(hex: 0xA16207)),
+        DotPalette(fill: Color(hex: 0xF97316), dark: Color(hex: 0x9A3412)),
+        DotPalette(fill: Color(hex: 0xA855F7), dark: Color(hex: 0x6B21A8)),
+        DotPalette(fill: Color(hex: 0xEC4899), dark: Color(hex: 0x9D174D)),
+        DotPalette(fill: Color(hex: 0x92400E), dark: Color(hex: 0x451A03)),
+        DotPalette(fill: Color(hex: 0x334155), dark: Color(hex: 0x020617)),
+        DotPalette(fill: Color(hex: 0xFFFFFF), dark: Color(hex: 0x64748B)),
     ]
 
     static let accent = Color(hex: 0xFACC15)
