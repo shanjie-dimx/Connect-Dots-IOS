@@ -32,6 +32,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C0110000000000000000E201"
+               BuildableName = "ColorLinkTests.xctest"
+               BlueprintName = "ColorLinkTests"
+               ReferencedContainer = "container:ColorLink.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "C0110000000000000000E101"
                BuildableName = "ColorLinkUITests.xctest"
                BlueprintName = "ColorLinkUITests"

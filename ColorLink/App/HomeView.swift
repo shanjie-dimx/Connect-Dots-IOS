@@ -128,7 +128,7 @@ private struct PressableStyle: ButtonStyle {
     }
 }
 
-/// Same artwork as ios/icon.svg (the app icon), minus the square background.
+/// Same artwork as icon.svg (the app icon), minus the square background.
 struct LogoMark: View {
     var body: some View {
         Canvas { ctx, size in

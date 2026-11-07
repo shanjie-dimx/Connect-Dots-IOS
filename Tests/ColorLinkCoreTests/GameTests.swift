@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import ColorLinkCore
+@testable import ColorLink
 
 private func pt(_ x: Double, _ y: Double) -> Point { Point(x: x, y: y) }
 
@@ -16,12 +16,18 @@ private func drag(_ game: Game, _ points: [Point], file: StaticString = #filePat
     return result
 }
 
-/// Reference solutions shared with the web version (tests/solutions.json at the repo root).
+/// Reference solutions shared with the web version, when that file is present.
 private func loadSolutions() throws -> [[String: [[Double]]]] {
-    let url = URL(fileURLWithPath: #filePath)
+    let besideTest = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .appendingPathComponent("solutions.json")
+    let legacy = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()
         .appendingPathComponent("../../../tests/solutions.json")
         .standardized
+    guard let url = [besideTest, legacy].first(where: { FileManager.default.fileExists(atPath: $0.path) }) else {
+        throw XCTSkip("solutions.json is not in this app repository")
+    }
     let data = try Data(contentsOf: url)
     return try JSONDecoder().decode([[String: [[Double]]]].self, from: data)
 }
