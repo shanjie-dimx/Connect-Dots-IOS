@@ -12,6 +12,11 @@ struct PlayView: View {
         self.onHome = onHome
     }
 
+    /// The scene shows first; the puzzle floats in on top of it a moment later.
+    @State private var boardVisible = false
+
+    private var chapter: Int { model.levelIndex / HomeView.levelsPerChapter }
+
     var body: some View {
         VStack(spacing: 10) {
             topBar
@@ -20,9 +25,17 @@ struct PlayView: View {
                 toast
             }
             .animation(.easeOut(duration: 0.2), value: model.toast)
+            .shadow(color: .black.opacity(0.45), radius: 24, y: 18)
+            .scaleEffect(boardVisible ? 1 : 0.7)
+            .offset(y: boardVisible ? 0 : 60)
+            .opacity(boardVisible ? 1 : 0)
             Text(model.levelIndex == 0 ? "Hold a dot and drag it to the other dot of the same color" : "Lines can't cross or pass through other dots")
-                .font(.system(size: 14))
-                .foregroundStyle(Theme.muted)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(.vertical, 6)
+                .padding(.horizontal, 14)
+                .background(.black.opacity(0.35), in: Capsule())
                 .frame(minHeight: 20)
             controls
         }
@@ -30,7 +43,17 @@ struct PlayView: View {
         .padding(.top, 10)
         .padding(.bottom, 14)
         .frame(maxWidth: 560)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(SceneBackground(name: SceneArt.backgroundName(chapter: chapter), fallback: chapter))
+        .task { @MainActor in
+            // UI tests drag at fixed board coordinates, so the board must not be mid-animation.
+            if ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("-uiTest") }) {
+                boardVisible = true
+                return
+            }
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.72)) { boardVisible = true }
+        }
         .overlay {
             if model.showWin {
                 WinCard(
@@ -62,10 +85,13 @@ struct PlayView: View {
                     .font(.system(size: 22, weight: .black))
                     .kerning(1)
                 Text("\(model.game.colors.count) pairs · \(model.connectedCount)/\(model.game.colors.count) connected")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Theme.muted)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
                     .accessibilityIdentifier("level-sub")
             }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 16)
+            .background(.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .frame(maxWidth: .infinity)
             Button { if let next = model.nextLevelIndex { onSelectLevel(next) } } label: { Image(systemName: "chevron.right") }
                 .buttonStyle(IconButtonStyle())
