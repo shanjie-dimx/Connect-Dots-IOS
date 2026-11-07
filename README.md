@@ -1,38 +1,34 @@
-# 同色连线 · iOS
+# 同色连线 · iPhone App
 
-原生 SwiftUI 版本，玩法、规则和 20 个关卡与网页版完全一致。支持 iPhone 和 iPad，iOS 16 及以上。
+这是一个 iPhone App，用 Xcode 打开后直接运行。支持 iPhone 和 iPad，iOS 16 及以上。玩法、规则和 20 个关卡与网页版一致。
 
-## 在 Xcode 中运行
+## 在 iPhone 上运行
 
-1. 用 Xcode 15 或更新版本打开 `ColorLink.xcodeproj`
-2. 选中 `ColorLink` target → Signing & Capabilities，选择你的 Team（真机运行需要；模拟器不需要）
+1. 用 Xcode 15 或更新版本打开 `ColorLink.xcodeproj`（打开这个文件，不要打开文件夹）
+2. 窗口顶部的运行目标选一台 iPhone 模拟器，或插上你的 iPhone
+3. 选中 `ColorLink` target → Signing & Capabilities，选择你的 Team（真机需要；模拟器不需要）
    - 如需上架，把 Bundle Identifier `com.simplegamesforiq.colorlink` 改成你自己的
-3. 选择模拟器或已连接的 iPhone，按 `⌘R`
+4. 按 `⌘R`。Xcode 会编译 `ColorLink.app` 并装到那台 iPhone 上
 
 ## 目录
 
 ```
-├── ColorLink.xcodeproj     Xcode 工程（App + UI 测试）
+├── ColorLink.xcodeproj     iPhone App 工程。产品是 ColorLink.app
 ├── ColorLink/
-│   ├── Core/               规则引擎，从 src/game.js、src/geometry.js 移植，不依赖 UIKit/SwiftUI
-│   │   └── Levels.swift    由 tools/export-ios-levels.js 从 src/levels.js 生成，勿手改
-│   ├── App/                SwiftUI 界面：关卡列表、棋盘绘制与手势、过关弹窗、进度保存
+│   ├── App/                SwiftUI 界面：关卡列表、棋盘、手势、过关弹窗、进度
+│   ├── Core/               规则和 20 个关卡
 │   └── Assets.xcassets     App 图标（源文件 icon.svg）
 ├── ColorLinkUITests/       在模拟器里用真实拖拽操作 App
-├── Tests/ColorLinkCoreTests  规则引擎单元测试（含用参考解逐关通关）
-├── Package.swift           仅用于 `swift test` 跑规则引擎测试
+├── Tests/ColorLinkCoreTests  规则引擎单元测试，挂在同一个 Xcode 工程里
 └── icon.svg
 ```
 
 ## 测试
 
 ```bash
-swift test                                  # 规则引擎，macOS 或 Linux 都能跑
 xcodebuild test -project ColorLink.xcodeproj -scheme ColorLink \
-  -destination 'platform=iOS Simulator,name=iPhone 16'   # UI 测试
+  -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
-
-`.github/workflows/ios.yml` 会在 macOS 上自动跑以上两项，并把模拟器截图作为 artifact 上传。
 
 ## 修改关卡
 
