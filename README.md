@@ -12,19 +12,14 @@ A native SwiftUI puzzle for iPhone and iPad (iOS 16+). Connect dots of the same 
 
 ## Adventure map and scenes
 
-The home screen is an adventure map: a trail walks from one level dot to the next, with a pin on the next level to play. Each of the 12 chapters has its own full-screen background. When a level opens, the background shows first and the circle puzzle then floats in on top of it.
+The game is a journey over the adventure map from the beach at the bottom to the sky at the top. The map has 12 locations, and each location holds 10 levels:
 
-Images live in `ColorLink/Assets.xcassets`:
+1. Sunny Beach, 2. Coral Reef, 3. Pirate Wreck, 4. Palm Oasis, 5. Golden Dunes, 6. Lost Ruins,
+7. Jungle River, 8. Thunder Falls, 9. Mushroom Grove, 10. Crystal Cave, 11. Aurora Peak, 12. Sky Summit.
 
-- `Logo`: the Connect Dots logo on the map (the app icon uses the same art).
-- `Map`: the adventure map behind the trail.
-- `Background01` to `Background12`: one background per chapter.
+Tap a location on the map to open it: its background fills the screen and its 10 levels float on top. Opening a level shows the same background first, then the circle puzzle floats in over it.
 
-Until `Map` and the backgrounds are added, the app shows colored gradients instead. Import them with:
-
-```bash
-python3 scripts/import_scenes.py path/to/folder   # one file with "map" in its name, plus 12 backgrounds sorted by name
-```
+The source images are in `pics/`. `scripts/import_scenes.py` converts them to JPEG and writes the `Map` and `Background01` to `Background12` image sets in `ColorLink/Assets.xcassets`; the order of locations is set there and in `SceneArt.locations` (`ColorLink/App/Theme.swift`), which also holds each location's position on the map.
 
 ## Levels
 

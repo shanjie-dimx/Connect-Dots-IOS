@@ -14,27 +14,37 @@ struct ColorLinkApp: App {
 }
 
 struct RootView: View {
-    @State private var levelIndex: Int?
+    private enum Screen: Equatable {
+        case map
+        case location(Int)
+        case level(Int)
+    }
+
+    @State private var screen = Screen.map
     /// Bumped on every level start so replaying the same level gets a fresh board.
     @State private var attempt = 0
 
     var body: some View {
         ZStack {
             AppBackground()
-            if let index = levelIndex {
-                PlayView(levelIndex: index, onSelectLevel: open, onHome: { levelIndex = nil })
+            switch screen {
+            case .map:
+                HomeView(onSelectLocation: { screen = .location($0) })
+                    .transition(.opacity)
+            case .location(let location):
+                LocationView(location: location, onSelectLevel: open, onBack: { screen = .map })
+                    .transition(.opacity)
+            case .level(let index):
+                PlayView(levelIndex: index, onSelectLevel: open, onHome: { screen = .location(SceneArt.location(ofLevel: index)) })
                     .id(attempt)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            } else {
-                HomeView(onSelectLevel: open)
-                    .transition(.move(edge: .leading).combined(with: .opacity))
+                    .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: levelIndex)
+        .animation(.easeInOut(duration: 0.3), value: screen)
     }
 
     private func open(_ index: Int) {
         attempt += 1
-        levelIndex = min(max(index, 0), LEVELS.count - 1)
+        screen = .level(min(max(index, 0), LEVELS.count - 1))
     }
 }

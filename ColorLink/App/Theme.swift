@@ -84,9 +84,43 @@ struct AppBackground: View {
     }
 }
 
+/// One stop on the adventure map. Each location holds 10 levels and has its own background.
+struct MapLocation {
+    let name: String
+    /// Center of the location's pad on the map image, as fractions of its width and height.
+    let x: Double
+    let y: Double
+}
+
 /// Names of the scene images in Assets.xcassets. Missing images fall back to a gradient.
 enum SceneArt {
     static let mapName = "Map"
+    /// The map image is 1024 × 3072.
+    static let mapAspect = 3.0
+    static let levelsPerLocation = 10
+
+    /// From the bottom of the map (start) to the top.
+    static let locations: [MapLocation] = [
+        MapLocation(name: "Sunny Beach", x: 0.497, y: 0.944),
+        MapLocation(name: "Coral Reef", x: 0.462, y: 0.863),
+        MapLocation(name: "Pirate Wreck", x: 0.502, y: 0.794),
+        MapLocation(name: "Palm Oasis", x: 0.488, y: 0.709),
+        MapLocation(name: "Golden Dunes", x: 0.523, y: 0.612),
+        MapLocation(name: "Lost Ruins", x: 0.506, y: 0.519),
+        MapLocation(name: "Jungle River", x: 0.521, y: 0.423),
+        MapLocation(name: "Thunder Falls", x: 0.487, y: 0.339),
+        MapLocation(name: "Mushroom Grove", x: 0.571, y: 0.256),
+        MapLocation(name: "Crystal Cave", x: 0.451, y: 0.184),
+        MapLocation(name: "Aurora Peak", x: 0.559, y: 0.132),
+        MapLocation(name: "Sky Summit", x: 0.448, y: 0.087),
+    ]
+
+    static func location(ofLevel index: Int) -> Int { index / levelsPerLocation }
+
+    static func levels(in location: Int) -> Range<Int> {
+        let start = location * levelsPerLocation
+        return start..<min(start + levelsPerLocation, LEVELS.count)
+    }
 
     static func backgroundName(chapter: Int) -> String {
         String(format: "Background%02d", chapter + 1)

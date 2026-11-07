@@ -15,7 +15,7 @@ struct PlayView: View {
     /// The scene shows first; the puzzle floats in on top of it a moment later.
     @State private var boardVisible = false
 
-    private var chapter: Int { model.levelIndex / HomeView.levelsPerChapter }
+    private var chapter: Int { SceneArt.location(ofLevel: model.levelIndex) }
 
     var body: some View {
         VStack(spacing: 10) {

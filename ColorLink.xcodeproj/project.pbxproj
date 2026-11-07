@@ -17,6 +17,7 @@
 		C0110000000000000000A008 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B008 /* Geometry.swift */; };
 		C0110000000000000000A009 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B009 /* Game.swift */; };
 		C0110000000000000000A010 /* Levels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B010 /* Levels.swift */; };
+		C0110000000000000000A012 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B012 /* LocationView.swift */; };
 		C0110000000000000000A011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B011 /* Assets.xcassets */; };
 		C0110000000000000000A101 /* ColorLinkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B101 /* ColorLinkUITests.swift */; };
 		C0110000000000000000A201 /* GameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0110000000000000000B201 /* GameTests.swift */; };
@@ -51,6 +52,7 @@
 		C0110000000000000000B008 /* Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
 		C0110000000000000000B009 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 		C0110000000000000000B010 /* Levels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Levels.swift; sourceTree = "<group>"; };
+		C0110000000000000000B012 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		C0110000000000000000B011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C0110000000000000000B100 /* ColorLinkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ColorLinkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0110000000000000000B101 /* ColorLinkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorLinkUITests.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			children = (
 				C0110000000000000000B001 /* ColorLinkApp.swift */,
 				C0110000000000000000B004 /* HomeView.swift */,
+				C0110000000000000000B012 /* LocationView.swift */,
 				C0110000000000000000B005 /* PlayView.swift */,
 				C0110000000000000000B006 /* BoardView.swift */,
 				C0110000000000000000B007 /* GameModel.swift */,
@@ -278,6 +281,7 @@
 				C0110000000000000000A002 /* Theme.swift in Sources */,
 				C0110000000000000000A003 /* ProgressStore.swift in Sources */,
 				C0110000000000000000A004 /* HomeView.swift in Sources */,
+				C0110000000000000000A012 /* LocationView.swift in Sources */,
 				C0110000000000000000A005 /* PlayView.swift in Sources */,
 				C0110000000000000000A006 /* BoardView.swift in Sources */,
 				C0110000000000000000A007 /* GameModel.swift in Sources */,
