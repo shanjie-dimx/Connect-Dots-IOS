@@ -19,13 +19,12 @@ final class ConnectDotsUITests: XCTestCase {
     func testDrawingLinesOnLevelOne() throws {
         app.launchArguments = ["-uiTestCrossLevel"]
         app.launch()
-        let location = app.buttons["location-1"]
-        XCTAssertTrue(location.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 10))
         saveScreenshot("01-map")
-        // Sub-levels live under the giant location on the map — no separate 1–10 page.
-        let levelButton = app.buttons["level-1"]
-        XCTAssertTrue(levelButton.waitForExistence(timeout: 5))
-        levelButton.tap()
+        // One tap: Play jumps straight into the next level.
+        let play = app.buttons["play"]
+        XCTAssertTrue(play.waitForExistence(timeout: 5))
+        play.tap()
 
         let board = app.descendants(matching: .any)["board"]
         XCTAssertTrue(board.waitForExistence(timeout: 5))
@@ -55,9 +54,8 @@ final class ConnectDotsUITests: XCTestCase {
     func testSolvingALevelShowsTheWinCardAndSavesProgress() throws {
         app.launchArguments = ["-uiTestStraightLevel"]
         app.launch()
-        XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 5))
-        app.buttons["level-1"].tap()
+        XCTAssertTrue(app.buttons["play"].waitForExistence(timeout: 10))
+        app.buttons["play"].tap()
         let board = app.descendants(matching: .any)["board"]
         XCTAssertTrue(board.waitForExistence(timeout: 5))
         for y in [-0.4, 0, 0.4] {
@@ -67,12 +65,12 @@ final class ConnectDotsUITests: XCTestCase {
         saveScreenshot("04-win")
         app.buttons["Play again"].tap()
         XCTAssertTrue(waitForLabel(app.staticTexts["level-sub"], "3 pairs · 0/3 connected"))
-        app.buttons["Back to map"].tap()
-        XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 3))
+        app.buttons["Back to levels"].tap()
+        // Sub-level locks live inside the location scene, not on the world map.
         XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 3))
         XCTAssertEqual(app.buttons["level-1"].label, "Level 1 (solved)")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Solved 1 / ")).firstMatch.exists)
-        saveScreenshot("05-map-progress")
+        saveScreenshot("05-location-progress")
     }
 
     private func drag(color: Int, on board: XCUIElement) {

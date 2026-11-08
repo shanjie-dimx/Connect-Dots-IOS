@@ -1,18 +1,21 @@
 import SwiftUI
 import UIKit
 
-/// Adventure map: 12 giant locations, each with 10 sub-levels nested underneath (no separate level list page).
+/// Adventure map: 12 giant locations only. Sub-levels live inside each location scene, not on the map.
 struct HomeView: View {
     @EnvironmentObject private var progress: ProgressStore
-    let onSelectLevel: (Int) -> Void
-
-    @State private var expandedLocation: Int?
+    let onSelectLocation: (Int) -> Void
+    let onPlay: (Int) -> Void
 
     private var playableCount: Int { LEVELS.filter { !$0.dots.isEmpty }.count }
 
     /// First location that still has an unsolved level.
     private var currentLocation: Int? {
         progress.nextUnsolvedIndex(levels: LEVELS).map(SceneArt.location(ofLevel:))
+    }
+
+    private var nextLevelIndex: Int? {
+        progress.nextUnsolvedIndex(levels: LEVELS)
     }
 
     var body: some View {
@@ -28,59 +31,54 @@ struct HomeView: View {
                             let location = SceneArt.locations[i]
                             let range = SceneArt.levels(in: i)
                             let playable = range.filter { !LEVELS[$0].dots.isEmpty }
-                            GiantLevelMarker(
+                            LocationMarker(
                                 number: i + 1,
                                 name: location.name,
                                 solved: playable.filter { progress.isSolved($0 + 1) }.count,
                                 total: playable.count,
                                 isCurrent: i == currentLocation,
                                 isUnlocked: progress.isLocationUnlocked(i),
-                                isExpanded: expandedLocation == i,
-                                subLevels: range.map { index in
-                                    SubLevelInfo(
-                                        index: index,
-                                        localNumber: index - range.lowerBound + 1,
-                                        done: progress.isSolved(index + 1),
-                                        unlocked: progress.isLevelUnlocked(index + 1),
-                                        isNext: index == progress.nextUnsolvedIndex(levels: LEVELS),
-                                        isEmpty: LEVELS[index].dots.isEmpty
-                                    )
-                                },
-                                onToggle: {
+                                action: {
                                     SoundPlayer.shared.play(.tap)
                                     guard progress.isLocationUnlocked(i) else { return }
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                        expandedLocation = expandedLocation == i ? nil : i
-                                    }
-                                },
-                                onSelectSubLevel: { index in
-                                    SoundPlayer.shared.play(.tap)
-                                    onSelectLevel(index)
+                                    onSelectLocation(i)
                                 }
                             )
                             .id(i)
-                            // Anchor the pad center on the map point; content grows downward.
-                            .offset(
-                                x: location.x * width - GiantLevelMarker.contentWidth / 2,
-                                y: location.y * height - GiantLevelMarker.padSize / 2
-                            )
+                            .position(x: location.x * width, y: location.y * height)
                         }
+                        // Scroll target so the beach / start is visible first, not the locked summit.
+                        Color.clear
+                            .frame(width: 1, height: 1)
+                            .id("map-bottom")
+                            .position(x: width / 2, y: height - 1)
                     }
                     .frame(width: width, height: height)
+                    .id("map-content")
                 }
                 .scrollIndicators(.hidden)
                 .ignoresSafeArea(edges: .bottom)
-                .onAppear {
-                    let focus = currentLocation ?? 0
-                    if progress.isLocationUnlocked(focus) {
-                        expandedLocation = focus
-                    }
-                    reader.scrollTo(focus, anchor: .center)
+                .onAppear { scrollToStart(reader) }
+                .task {
+                    // Layout may not be ready on the first onAppear pass.
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    scrollToStart(reader)
                 }
             }
         }
         .overlay(alignment: .top) { header }
+        .safeAreaInset(edge: .bottom, spacing: 0) { playBar }
         .background(Color(hex: 0x0C4A6E).ignoresSafeArea())
+    }
+
+    /// Open on the beach / current progress — never leave the player staring at the locked summit.
+    private func scrollToStart(_ reader: ScrollViewProxy) {
+        if let focus = currentLocation, focus > 0 {
+            reader.scrollTo(focus, anchor: .center)
+        } else {
+            reader.scrollTo(0, anchor: .bottom)
+            reader.scrollTo("map-bottom", anchor: .bottom)
+        }
     }
 
     @ViewBuilder
@@ -113,106 +111,111 @@ struct HomeView: View {
         .padding(.horizontal, 16)
         .padding(.top, 4)
     }
+
+    @ViewBuilder
+    private var playBar: some View {
+        if let next = nextLevelIndex {
+            Button {
+                SoundPlayer.shared.play(.tap)
+                onPlay(next)
+            } label: {
+                Text("Play")
+                    .font(.system(size: 22, weight: .heavy))
+                    .tracking(1)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(Theme.primaryGradient, in: Capsule())
+                    .shadow(color: .black.opacity(0.35), radius: 10, y: 4)
+            }
+            .buttonStyle(PressableStyle())
+            .padding(.horizontal, 28)
+            .padding(.bottom, 28)
+            .accessibilityLabel("Play level \(next + 1)")
+            .accessibilityIdentifier("play")
+        }
+    }
 }
 
-private struct SubLevelInfo: Identifiable {
-    var id: Int { index }
-    let index: Int
-    let localNumber: Int
-    let done: Bool
-    let unlocked: Bool
-    let isNext: Bool
-    let isEmpty: Bool
-}
-
-/// One giant location pad on the map, with its 10 sub-level chips nested underneath when expanded.
-private struct GiantLevelMarker: View {
-    static let padSize: CGFloat = 54
-    /// Wide enough for the 5×2 sub-level strip so the pad stays centered as content expands.
-    static let contentWidth: CGFloat = 176
-
+private struct LocationMarker: View {
     let number: Int
     let name: String
     let solved: Int
     let total: Int
     let isCurrent: Bool
     let isUnlocked: Bool
-    let isExpanded: Bool
-    let subLevels: [SubLevelInfo]
-    let onToggle: () -> Void
-    let onSelectSubLevel: (Int) -> Void
+    let action: () -> Void
 
     @State private var pulse = false
 
     private var done: Bool { total > 0 && solved >= total }
 
     var body: some View {
-        VStack(spacing: 4) {
-            Button(action: onToggle) {
-                pad
-                    .frame(width: Self.padSize, height: Self.padSize)
-                    .overlay {
-                        if isCurrent && isUnlocked {
-                            Circle()
-                                .stroke(Theme.accent, lineWidth: 4)
-                                .scaleEffect(pulse ? 1.4 : 1.1)
-                                .opacity(pulse ? 0.2 : 0.9)
-                                .allowsHitTesting(false)
-                        }
+        Button(action: action) {
+            VStack(spacing: 4) {
+                ZStack {
+                    Circle()
+                        .fill(padGradient)
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 3))
+                        .shadow(color: .black.opacity(0.45), radius: 4, y: 3)
+                    if !isUnlocked {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.95))
+                            .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+                    } else if done {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
+                    } else {
+                        Text("\(number)")
+                            .font(.system(size: 22, weight: .heavy))
+                            .foregroundStyle(.white)
                     }
-                    .overlay(alignment: .top) {
-                        if isCurrent && isUnlocked {
-                            Image(systemName: "mappin.circle.fill")
-                                .font(.system(size: 30))
-                                .foregroundStyle(.white, Theme.danger)
-                                .shadow(radius: 3)
-                                .offset(y: -38)
-                                .accessibilityHidden(true)
-                        }
+                }
+                .frame(width: 54, height: 54)
+                .overlay {
+                    if isCurrent && isUnlocked {
+                        Circle()
+                            .stroke(Theme.accent, lineWidth: 4)
+                            .scaleEffect(pulse ? 1.4 : 1.1)
+                            .opacity(pulse ? 0.2 : 0.9)
                     }
-            }
-            .buttonStyle(PressableStyle())
-            .accessibilityLabel(accessibilityText)
-            .accessibilityIdentifier("location-\(number)")
-            .accessibilityHint(isUnlocked ? (isExpanded ? "Collapse sub-levels" : "Show sub-levels") : "Locked")
-
-            label
-
-            if isUnlocked && isExpanded {
-                subLevelStrip
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+                .overlay(alignment: .top) {
+                    if isCurrent && isUnlocked {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundStyle(.white, Theme.danger)
+                            .shadow(radius: 3)
+                            .offset(y: -38)
+                            .accessibilityHidden(true)
+                    }
+                }
+                VStack(spacing: 0) {
+                    Text(name)
+                        .font(.system(size: 13, weight: .heavy))
+                    Text(isUnlocked ? "\(solved)/\(total)" : "Locked")
+                        .font(.system(size: 11, weight: .bold))
+                        .opacity(0.85)
+                }
+                .foregroundStyle(.white)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 10)
+                .background(.black.opacity(0.5), in: Capsule())
+                .fixedSize()
             }
         }
-        .frame(width: Self.contentWidth, alignment: .top)
+        .buttonStyle(PressableStyle())
         .saturation(isUnlocked ? 1 : 0)
         .opacity(isUnlocked ? 1 : 0.85)
+        .disabled(!isUnlocked)
         .onAppear {
             guard isCurrent && isUnlocked else { return }
             withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true }
         }
-    }
-
-    private var pad: some View {
-        ZStack {
-            Circle()
-                .fill(padGradient)
-                .overlay(Circle().strokeBorder(.white, lineWidth: 3))
-                .shadow(color: .black.opacity(0.45), radius: 4, y: 3)
-            if !isUnlocked {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.95))
-                    .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
-            } else if done {
-                Image(systemName: "star.fill")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white)
-            } else {
-                Text("\(number)")
-                    .font(.system(size: 22, weight: .heavy))
-                    .foregroundStyle(.white)
-            }
-        }
+        .accessibilityLabel(accessibilityText)
+        .accessibilityIdentifier("location-\(number)")
     }
 
     private var padGradient: LinearGradient {
@@ -237,109 +240,11 @@ private struct GiantLevelMarker: View {
         )
     }
 
-    private var label: some View {
-        VStack(spacing: 0) {
-            Text(name)
-                .font(.system(size: 13, weight: .heavy))
-            Text(isUnlocked ? "\(solved)/\(total)" : "Locked")
-                .font(.system(size: 11, weight: .bold))
-                .opacity(0.85)
-        }
-        .foregroundStyle(.white)
-        .padding(.vertical, 3)
-        .padding(.horizontal, 10)
-        .background(.black.opacity(0.5), in: Capsule())
-        .fixedSize()
-    }
-
-    private var subLevelStrip: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.fixed(28), spacing: 5), count: 5), spacing: 5) {
-            ForEach(subLevels) { sub in
-                SubLevelChip(info: sub) {
-                    onSelectSubLevel(sub.index)
-                }
-            }
-        }
-        .padding(8)
-        .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.25)))
-        .shadow(color: .black.opacity(0.4), radius: 8, y: 4)
-        .fixedSize()
-    }
-
     private var accessibilityText: String {
         if !isUnlocked {
             return "\(name), location \(number), locked"
         }
         return "\(name), location \(number), \(solved) of \(total) solved"
-    }
-}
-
-private struct SubLevelChip: View {
-    let info: SubLevelInfo
-    let action: () -> Void
-
-    private var canPlay: Bool { info.unlocked && !info.isEmpty }
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(fillStyle)
-                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(borderColor, lineWidth: info.isNext ? 2.5 : 1.5))
-                if !info.unlocked && !info.isEmpty {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.9))
-                } else if info.done {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.white)
-                } else {
-                    Text("\(info.localNumber)")
-                        .font(.system(size: 12, weight: .heavy))
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(width: 28, height: 28)
-            .saturation(info.unlocked || info.isEmpty ? 1 : 0)
-            .opacity(info.isEmpty ? 0.35 : info.unlocked ? 1 : 0.75)
-        }
-        .buttonStyle(PressableStyle())
-        .disabled(!canPlay)
-        .accessibilityLabel(chipLabel)
-        .accessibilityIdentifier("level-\(info.index + 1)")
-    }
-
-    private var fillStyle: AnyShapeStyle {
-        if !info.unlocked && !info.isEmpty {
-            return AnyShapeStyle(LinearGradient(
-                colors: [Color(hex: 0x94A3B8), Color(hex: 0x64748B)],
-                startPoint: .top,
-                endPoint: .bottom
-            ))
-        }
-        if info.done {
-            return AnyShapeStyle(LinearGradient(
-                colors: [Color(hex: 0xFACC15), Color(hex: 0xD97706)],
-                startPoint: .top,
-                endPoint: .bottom
-            ))
-        }
-        return AnyShapeStyle(Color.black.opacity(0.45))
-    }
-
-    private var borderColor: Color {
-        if info.isNext { return Theme.accent }
-        return .white.opacity(0.55)
-    }
-
-    private var chipLabel: String {
-        let n = info.index + 1
-        if info.isEmpty { return "Level \(n) (coming soon)" }
-        if !info.unlocked { return "Level \(n) (locked)" }
-        if info.done { return "Level \(n) (solved)" }
-        return "Level \(n)"
     }
 }
 
