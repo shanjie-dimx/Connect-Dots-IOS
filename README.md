@@ -33,12 +33,23 @@ The speaker button on the map and location screens mutes everything (the setting
 
 120 levels in 12 chapters of 10. They go from 3 pairs of dots up to 10 pairs and get harder along the way:
 
-- Levels 1–10 have 3 pairs and no dots on the rim.
-- Later levels put dots on the rim, where no line can get around them.
-- From level 20, some pairs have both dots on the rim, so their line cuts the circle in two.
+- Levels 1–4 are a short tutorial (few conflicts, no rim).
+- From level 5, boards are built to feel *tricky*, not just crowded: the obvious straight connections cross, so you have to wrap around.
+- Later levels add rim dots (nothing can squeeze past them) and rim-to-rim chords that cut the circle in two.
 - Every level has a reference solution that the unit tests replay with the real rules engine.
 
-A level the generator could not solve in time is left blank and shows as "coming soon" (currently level 120).
+### What makes a board tricky
+
+The generator looks for the same traps that make viral “connect the colors without crossing” puzzles hard:
+
+1. **Straight-line bait** — same-color chords cross, so the shortest-looking moves are illegal.
+2. **Cage traps** — connecting one pair near-straight puts another pair’s ends on opposite sides of that line, so that color is caged unless it wraps the rim.
+3. **Forced wrap** — the real solution hugs the circle edge; path length is much longer than the chord.
+4. **Interleaved rings** — early/mid boards place colors in round-robin order around a ring (the classic 0,1,2,0,1,2 pattern), which maximizes mutual crossings.
+
+Difficulty is scored from crossings, cages, rim/chords, and detour — not only from “more pairs.”
+
+A level the generator could not solve in time is left blank and shows as "coming soon".
 
 Regenerate levels and solutions with:
 
