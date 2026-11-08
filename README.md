@@ -7,7 +7,7 @@ A native SwiftUI puzzle for iPhone and iPad (iOS 16+). Connect dots of the same 
 1. Open `ConnectDots.xcodeproj` with Xcode 15 or later (open the project file, not the folder).
 2. Pick an iPhone simulator or a connected iPhone as the run destination.
 3. For a real device, select the `ConnectDots` target → Signing & Capabilities and choose your Team.
-   - To ship it, change the bundle identifier `com.simplegamesforiq.connectdots` to your own.
+   - The bundle identifier is `com.dimxlabs.connectdots`.
 4. Press `⌘R`.
 
 ## Adventure map and scenes
