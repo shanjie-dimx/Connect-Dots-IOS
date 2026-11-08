@@ -22,7 +22,7 @@ final class ConnectDotsUITests: XCTestCase {
         let location = app.buttons["location-1"]
         XCTAssertTrue(location.waitForExistence(timeout: 10))
         saveScreenshot("01-map")
-        location.tap()
+        // Sub-levels live under the giant location on the map — no separate 1–10 page.
         let levelButton = app.buttons["level-1"]
         XCTAssertTrue(levelButton.waitForExistence(timeout: 5))
         levelButton.tap()
@@ -56,7 +56,6 @@ final class ConnectDotsUITests: XCTestCase {
         app.launchArguments = ["-uiTestStraightLevel"]
         app.launch()
         XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 10))
-        app.buttons["location-1"].tap()
         XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 5))
         app.buttons["level-1"].tap()
         let board = app.descendants(matching: .any)["board"]
@@ -68,11 +67,12 @@ final class ConnectDotsUITests: XCTestCase {
         saveScreenshot("04-win")
         app.buttons["Play again"].tap()
         XCTAssertTrue(waitForLabel(app.staticTexts["level-sub"], "3 pairs · 0/3 connected"))
-        app.buttons["Back to levels"].tap()
+        app.buttons["Back to map"].tap()
+        XCTAssertTrue(app.buttons["location-1"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["level-1"].waitForExistence(timeout: 3))
         XCTAssertEqual(app.buttons["level-1"].label, "Level 1 (solved)")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Solved 1 / ")).firstMatch.exists)
-        saveScreenshot("05-location-progress")
+        saveScreenshot("05-map-progress")
     }
 
     private func drag(color: Int, on board: XCUIElement) {

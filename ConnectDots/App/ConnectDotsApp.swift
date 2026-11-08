@@ -16,7 +16,6 @@ struct ConnectDotsApp: App {
 struct RootView: View {
     private enum Screen: Equatable {
         case map
-        case location(Int)
         case level(Int)
     }
 
@@ -29,13 +28,10 @@ struct RootView: View {
             AppBackground()
             switch screen {
             case .map:
-                HomeView(onSelectLocation: { screen = .location($0) })
-                    .transition(.opacity)
-            case .location(let location):
-                LocationView(location: location, onSelectLevel: open, onBack: { screen = .map })
+                HomeView(onSelectLevel: open)
                     .transition(.opacity)
             case .level(let index):
-                PlayView(levelIndex: index, onSelectLevel: open, onHome: { screen = .location(SceneArt.location(ofLevel: index)) })
+                PlayView(levelIndex: index, onSelectLevel: open, onHome: { screen = .map })
                     .id(attempt)
                     .transition(.opacity)
             }

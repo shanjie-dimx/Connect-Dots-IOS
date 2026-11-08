@@ -84,7 +84,7 @@ struct AppBackground: View {
     }
 }
 
-/// One stop on the adventure map. Each location holds 10 levels and has its own background.
+/// One giant stop on the adventure map. Each location nests 10 sub-levels and has its own background.
 struct MapLocation {
     let name: String
     /// Center of the location's pad on the map image, as fractions of its width and height.
