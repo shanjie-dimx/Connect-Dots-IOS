@@ -17,7 +17,7 @@ The game is a journey over the adventure map from the beach at the bottom to the
 1. Sunny Beach, 2. Coral Reef, 3. Pirate Wreck, 4. Palm Oasis, 5. Golden Dunes, 6. Lost Ruins,
 7. Jungle River, 8. Thunder Falls, 9. Mushroom Grove, 10. Crystal Cave, 11. Aurora Peak, 12. Sky Summit.
 
-Tap a giant location on the map to expand its 10 sub-levels underneath it (Royal Match–style nesting — no separate 1–10 page). Locked locations stay gray with a lock until you clear the previous ones. Opening a sub-level shows that location's background first, then the circle puzzle floats in over it.
+The map shows the 12 giant locations only (locked ones are gray with a lock). Tap one to open its scene, where the 10 sub-levels sit with their own locks. Or just tap **Play** at the bottom to jump straight into the next level. The map opens at the beach (bottom), not the locked summit.
 
 The source images are in `pics/`. `scripts/import_scenes.py` converts them to JPEG and writes the `Map` and `Background01` to `Background12` image sets in `ConnectDots/Assets.xcassets`; the order of locations is set there and in `SceneArt.locations` (`ConnectDots/App/Theme.swift`), which also holds each location's position on the map.
 

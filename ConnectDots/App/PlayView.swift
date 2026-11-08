@@ -83,7 +83,7 @@ struct PlayView: View {
         HStack(spacing: 12) {
             Button { SoundPlayer.shared.play(.tap); onHome() } label: { Image(systemName: "chevron.left") }
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("Back to map")
+                .accessibilityLabel("Back to levels")
             VStack(spacing: 2) {
                 Text("Level \(model.levelIndex + 1)")
                     .font(.system(size: 22, weight: .black))
@@ -187,7 +187,7 @@ private struct WinCard: View {
                 HStack(spacing: 10) {
                     Button("Play again", action: onReplay)
                         .buttonStyle(CardButtonStyle(background: AnyShapeStyle(Color.white.opacity(0.08))))
-                    Button(isLast ? "Map" : "Next level", action: onNext)
+                    Button(isLast ? "Levels" : "Next level", action: onNext)
                         .buttonStyle(CardButtonStyle(background: AnyShapeStyle(Theme.primaryGradient), bordered: false))
                 }
             }
